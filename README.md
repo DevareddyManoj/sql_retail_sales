@@ -1,25 +1,26 @@
+
 # Retail Sales Analysis SQL Project
 
 ## Project Overview
 
 **Project Title**: Retail Sales Analysis  
-**Database**: `p1_retail_db`
+**Database**: `p1_retail_db`  
 
-This project showcases my ability to analyze retail sales data using SQL. It involves setting up a retail sales database, cleaning the data, performing exploratory data analysis (EDA), and deriving actionable business insights. Through this project, I aimed to strengthen my SQL skills while addressing real-world retail scenarios.  
+This project demonstrates my ability to analyze retail sales data using SQL. It involves creating a database, cleaning data, conducting exploratory data analysis, and answering business questions to extract actionable insights. This project emphasizes practical SQL applications for retail business analysis.
 
 ## Objectives
 
-1. **Database Setup**: Create and populate a retail sales database.  
-2. **Data Cleaning**: Identify and handle missing or inconsistent data.  
-3. **Exploratory Data Analysis**: Gain a deeper understanding of the data through structured queries.  
-4. **Business Insights**: Use SQL queries to answer key business questions and provide insights into sales trends and customer behavior.
+1. **Database Setup**: Create and populate the retail sales database.  
+2. **Data Cleaning**: Address missing or inconsistent data.  
+3. **Exploratory Data Analysis**: Gain insights through structured queries.  
+4. **Business Insights**: Use SQL to answer key business questions and derive insights into sales and customer behavior.
 
 ## Project Structure
 
 ### 1. Database Setup
 
-- **Database Creation**: Established a database named `p1_retail_db`.  
-- **Table Structure**: Created a `retail_sales` table to store sales transaction data. The table contains attributes such as transaction ID, sale date and time, customer demographics, product categories, and sales metrics.
+- **Database Creation**: Created a database named `p1_retail_db`.  
+- **Table Structure**: Designed a `retail_sales` table with attributes for transactions, sales details, customer demographics, and product information.
 
 ```sql
 CREATE DATABASE p1_retail_db;
@@ -42,43 +43,103 @@ CREATE TABLE retail_sales
 
 ### 2. Data Cleaning and Exploration
 
-- **Initial Exploration**: Checked record count, unique customer IDs, and product categories.  
-- **Null Handling**: Identified and removed records with missing values.  
+Performed initial exploration and data cleaning:  
 
-```sql
-SELECT COUNT(*) FROM retail_sales;
-SELECT COUNT(DISTINCT customer_id) FROM retail_sales;
-SELECT DISTINCT category FROM retail_sales;
+- **Count Records**:  
+   ```sql
+   SELECT COUNT(*) FROM retail_sales;
+   ```
 
-DELETE FROM retail_sales
-WHERE 
-    sale_date IS NULL OR sale_time IS NULL OR customer_id IS NULL OR 
-    gender IS NULL OR age IS NULL OR category IS NULL OR 
-    quantity IS NULL OR price_per_unit IS NULL OR cogs IS NULL;
-```
+- **Unique Customers**:  
+   ```sql
+   SELECT COUNT(DISTINCT customer_id) FROM retail_sales;
+   ```
+
+- **Product Categories**:  
+   ```sql
+   SELECT DISTINCT category FROM retail_sales;
+   ```
+
+- **Handle Missing Data**:  
+   ```sql
+   DELETE FROM retail_sales
+   WHERE sale_date IS NULL OR sale_time IS NULL OR customer_id IS NULL OR 
+         gender IS NULL OR age IS NULL OR category IS NULL OR 
+         quantity IS NULL OR price_per_unit IS NULL OR cogs IS NULL;
+   ```
+
+---
 
 ### 3. Data Analysis
 
-Key SQL queries were designed to address specific business questions:
+Below are the SQL queries addressing specific business questions:
 
-1. **Sales on Specific Dates**:  
-   Retrieve sales data for November 5, 2022.  
-
-   ```sql
-   SELECT * FROM retail_sales WHERE sale_date = '2022-11-05';
-   ```
-
-2. **Category Insights**:  
-   Identify high-volume sales for 'Clothing' in November 2022.  
-
+1. **Sales on Specific Date**  
+   Retrieve all sales made on `2022-11-05`.  
    ```sql
    SELECT * FROM retail_sales
-   WHERE category = 'Clothing' AND TO_CHAR(sale_date, 'YYYY-MM') = '2022-11' AND quantity > 4;
+   WHERE sale_date = '2022-11-05';
    ```
 
-3. **Top Performers**:  
-   Find the top 5 customers based on total sales. 
+2. **High-Quantity Sales in Clothing Category**  
+   Identify transactions where the category is `Clothing` and the quantity sold exceeds 4 in November 2022.  
+   ```sql
+   SELECT * FROM retail_sales
+   WHERE category = 'Clothing'
+         AND EXTRACT(YEAR FROM sale_date) = 2022
+         AND EXTRACT(MONTH FROM sale_date) = 11
+         AND quantity > 4;
+   ```
 
+3. **Category-Wise Total Sales**  
+   Calculate total sales and order count for each category.  
+   ```sql
+   SELECT category, SUM(total_sale) AS net_sales, COUNT(*) AS total_orders
+   FROM retail_sales
+   GROUP BY category;
+   ```
+
+4. **Customer Insights for Beauty Products**  
+   Find the average age of customers purchasing items from the `Beauty` category.  
+   ```sql
+   SELECT ROUND(AVG(age), 2) AS avg_age
+   FROM retail_sales
+   WHERE category = 'Beauty';
+   ```
+
+5. **High-Value Transactions**  
+   Retrieve transactions with total sales above 1000.  
+   ```sql
+   SELECT * FROM retail_sales
+   WHERE total_sale > 1000;
+   ```
+
+6. **Gender and Category Analysis**  
+   Total transactions by gender and category.  
+   ```sql
+   SELECT category, gender, COUNT(*) AS total_transactions
+   FROM retail_sales
+   GROUP BY category, gender
+   ORDER BY category, gender;
+   ```
+
+7. **Top-Selling Month per Year**  
+   Determine the best month in terms of average sales for each year.  
+   ```sql
+   SELECT year, month, avg_sale
+   FROM (
+       SELECT EXTRACT(YEAR FROM sale_date) AS year,
+              EXTRACT(MONTH FROM sale_date) AS month,
+              AVG(total_sale) AS avg_sale,
+              RANK() OVER (PARTITION BY EXTRACT(YEAR FROM sale_date) ORDER BY AVG(total_sale) DESC) AS rank
+       FROM retail_sales
+       GROUP BY year, month
+   ) ranked_data
+   WHERE rank = 1;
+   ```
+
+8. **Top 5 Customers by Total Sales**  
+   Identify the top 5 customers based on total sales.  
    ```sql
    SELECT customer_id, SUM(total_sale) AS total_sales
    FROM retail_sales
@@ -87,36 +148,48 @@ Key SQL queries were designed to address specific business questions:
    LIMIT 5;
    ```
 
-4. **Sales Trends**:  
-   Calculate the best-selling month each year.  
-
+9. **Unique Customer Count per Category**  
+   Find the number of unique customers purchasing from each category.  
    ```sql
-   SELECT year, month, avg_sale
-   FROM (
-       SELECT EXTRACT(YEAR FROM sale_date) AS year, EXTRACT(MONTH FROM sale_date) AS month,
-              AVG(total_sale) AS avg_sale,
-              RANK() OVER (PARTITION BY EXTRACT(YEAR FROM sale_date) ORDER BY AVG(total_sale) DESC) AS rank
-       FROM retail_sales
-       GROUP BY 1, 2
-   ) t
-   WHERE rank = 1;
+   SELECT category, COUNT(DISTINCT customer_id) AS unique_customers
+   FROM retail_sales
+   GROUP BY category;
    ```
 
-... (Include all queries as per your content).
+10. **Order Shifts Analysis**  
+    Analyze the number of orders placed in Morning, Afternoon, and Evening shifts.  
+    ```sql
+    WITH hourly_sales AS (
+        SELECT *,
+               CASE
+                   WHEN EXTRACT(HOUR FROM sale_time) < 12 THEN 'Morning'
+                   WHEN EXTRACT(HOUR FROM sale_time) BETWEEN 12 AND 17 THEN 'Afternoon'
+                   ELSE 'Evening'
+               END AS shift
+        FROM retail_sales
+    )
+    SELECT shift, COUNT(*) AS total_orders
+    FROM hourly_sales
+    GROUP BY shift;
+    ```
+
+---
 
 ### 4. Insights
 
-- **Customer Insights**: Identified top-spending customers and analyzed demographic trends.  
-- **Sales Trends**: Determined peak months and high-demand product categories.  
-- **Operational Analysis**: Assessed sales performance across different shifts (morning, afternoon, evening).  
+- **Sales Trends**: Identified peak sales months, high-value transactions, and top-performing categories.  
+- **Customer Behavior**: Analyzed customer demographics, spending habits, and purchasing trends.  
+- **Operational Insights**: Highlighted sales performance across shifts, aiding operational planning.  
+
+---
 
 ## Conclusion
 
-This project provided a comprehensive understanding of SQL's role in retail sales analysis, from database setup and data cleaning to delivering actionable business insights. It demonstrates my ability to apply SQL skills to analyze data effectively, identify trends, and support decision-making.
+This project highlights the application of SQL in real-world retail analysis, showcasing the ability to extract actionable insights from data. It builds a solid foundation for advanced analytics and business decision-making.
 
 ## How to Use
 
-1. **Clone the Repository**: Clone the GitHub repository to your local environment.  
-2. **Database Setup**: Run the provided SQL scripts to set up the database and populate data.  
-3. **Execute Queries**: Use the SQL queries to explore the dataset and derive insights.  
-4. **Customize**: Feel free to adapt the queries to explore additional dimensions of the data.
+1. **Clone Repository**: Clone this project from GitHub.  
+2. **Set Up Database**: Use the `database_setup.sql` script to create and populate the database.  
+3. **Run Queries**: Execute the provided SQL scripts for analysis and insights.  
+4. **Customize**: Modify queries as needed to explore additional questions.
