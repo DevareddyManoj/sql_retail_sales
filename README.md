@@ -185,7 +185,7 @@ Below are the SQL queries addressing specific business questions:
 
 ## Conclusion
 
-This project highlights the application of SQL in real-world retail analysis, showcasing the ability to extract actionable insights from data. It builds a solid foundation for advanced analytics and business decision-making.
+This project highlights my application of SQL in real-world retail analysis, showcasing my ability to extract actionable insights from data. It helped me build a solid foundation for advanced analytics and business decision-making.
 
 ## How to Use
 
