@@ -77,7 +77,7 @@ Key SQL queries were designed to address specific business questions:
    ```
 
 3. **Top Performers**:  
-   Find the top 5 customers based on total sales.  
+   Find the top 5 customers based on total sales. 
 
    ```sql
    SELECT customer_id, SUM(total_sale) AS total_sales
@@ -120,7 +120,3 @@ This project provided a comprehensive understanding of SQL's role in retail sale
 2. **Database Setup**: Run the provided SQL scripts to set up the database and populate data.  
 3. **Execute Queries**: Use the SQL queries to explore the dataset and derive insights.  
 4. **Customize**: Feel free to adapt the queries to explore additional dimensions of the data.
-
----
-
-Let me know if you want further refinements or additions!
